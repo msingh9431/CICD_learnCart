@@ -1,0 +1,40 @@
+name: CICD Demo
+on: 
+  push:
+    branches: [ master,develop,main ]  
+  pull_request:
+   branches: [ master,develop,main ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+        run:
+          working-directory: ./CICD_learnCart
+    steps:
+        - uses: actions/checkout@v2
+        - uses: actions/cache@v1      
+          with:        
+                path: |
+                  ~/.m2/repository  
+                  ~/.m2/settings.xml
+                key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}        
+                restore-keys: |          
+                   ${{ runner.os }}-maven- 
+        - name: Create maven settings.xml
+          uses: whelk-io/maven-settings-xml-action@v5
+          with:
+            servers: '[{"id": "MuleRepository", "username": "${{ secrets.MULE_ENT_USERNAME_NEXUS }}", "password": "${{ secrets.MULE_ENT_PASSWORD_NEXUS }}"},{"id": "anypoint-exchange", "username": "${{ secrets.USERNAME }}", "password": "${{ secrets.PASSWORD }}" }]'
+            repositories: '[{"id": "MuleRepository", "url": "https://repository.mulesoft.org/nexus-ee/content/repositories/releases-ee/"},{"id": "local-repo", "url": "file:///${project.basedir}/local-repo"},{"id": "anypoint-exchange", "url": "https://maven.anypoint.mulesoft.com/api/v2/maven"},{"id": "mulesoft-releases", "url": "https://repository.mulesoft.org/releases/"},{"id": "mule-public", "url": "https://repository.mulesoft.org/nexus/content/repositories/public"}]' 
+        - run: |
+            cat ~/.m2/settings.xml
+        - name: Set up JDK 1.8 version
+          uses: actions/setup-java@v1
+          with:
+            java-version: 1.8
+            path: ~/.m2/repository
+            settings-path: ${{ github.workspace }} # location for the settings.xml file
+
+ 
+
+        - name: Build and cloudhub deployment
+          run: mvn clean package deploy -DmuleDeploy -Dusername="${{ secrets.USERNAME }}" -Dpassword="${{ secrets.PASSWORD }}"
