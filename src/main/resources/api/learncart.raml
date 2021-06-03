@@ -19,8 +19,7 @@ types:
   usersandsubscribedcourses: !include /users/datatype/users-courses-details.raml
   coursedetails: !include /course/course-details.raml
   learncart: !include /course/learncart-datatype.raml
-  learncart-response-datatype: !include /course/learncart200Response-dataType.raml
-  bestCourses-response-datatype: !include /course/bestcourses200Response-dataType.raml
+
 
 
 
@@ -355,8 +354,27 @@ traits:
       200:
         body:
           application/json:
-            type: learncart-response-datatype
-            example: !include /course/learncart200Response-example.json
+           type: array
+           items:
+             type: object
+             properties:
+              name:
+                type: string
+                required: true
+                example: "Harry"
+              author: 
+                type: string
+                required: true
+                example: "JK"
+              duration:
+                type: string
+                example: "2hrs"
+                required: true
+              price:
+                type: integer
+                required: true
+                example: 199
+           example: !include /course/learncart200Response-example.json
   /bestcourses:
     get:
       is : [errorResponse]
@@ -369,7 +387,22 @@ traits:
         200:
           body:
             application/json:
-              type: bestCourses-response-datatype
+              type: array
+              items:
+                type: object
+                properties:
+                  coursename:
+                    type: string
+                    required: true
+                    example: "Java Fundamentals"
+                  Performance:
+                    type: integer
+                    required: true
+                    example: 80
+                  duration:
+                    type: string
+                    required: true
+                    example: "hj"
               example: !include /course/bestcourse200response-example.json
 
            
