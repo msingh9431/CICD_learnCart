@@ -8,7 +8,6 @@ http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/m
         <db:generic-connection url="${db.postgresql.url}" driverClassName="org.postgresql.Driver" user="${db.postgresql.user}" password="${db.postgresql.password}" />
     </db:config>
     <apikit:config outboundHeadersMapName="outboundHeadersMapName" httpStatusVarName="httpStatus" doc:name="Router" doc:id="9ca4ec85-5e54-434b-8b7f-9bf0ebde646f" name="learncart-config" raml="api\learncart.raml" keepRamlBaseUri="true" api="learncart.raml" />
-    <json-logger:config name="JSON_Logger_Config" doc:name="JSON Logger Config" doc:id="50b5fc3f-1894-4b5d-9267-13090be50aa8" environment="${mule.env}" />
 	<flow name="learncart-main">
         <http:listener config-ref="learncart-httpListenerConfig" path="${http.listner.path}">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -84,7 +83,6 @@ http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/m
         <flow-ref doc:name="courseAddedInCart" doc:id="0bd68907-1802-444c-a8db-7364f80313ef" name="courseAddedInCart" />
     </flow>
     <flow name="post:\course:application\json:learncart-config">
-        <json-logger:logger doc:name="Logger" doc:id="1e57dd94-2961-4517-bf00-9724e44a96e6" config-ref="JSON_Logger_Config" message="Initial request"/>
 		<flow-ref doc:name="addCourse" doc:id="5cbcd80a-8657-4261-8cf6-72d1f05625aa" name="addCourse" />
     </flow>
     <flow name="post:\user\(id)\orderdetails:application\json:learncart-config">
@@ -115,20 +113,11 @@ http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/m
 }]]]></db:input-parameters>
             </db:insert>
         </foreach>
-        <ee:transform xsi:schemaLocation=" http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  message: "Course Added"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
-        <logger level="INFO" doc:name="Logger" doc:id="9cde8577-ff48-4caa-8524-a42617c39b30" message="Added into cart" />
-    </flow>
+		<flow-ref doc:name="subscribedCourses" doc:id="962e1b53-36cb-4766-b270-ea336bbd6e7b" name="subscribedCourses"/>
+   </flow>
     <flow name="get:\learncart\bestcourses:learncart-config">
-        <flow-ref doc:name="bestCourses" doc:id="80aba85d-3db9-4059-83b0-42aa9c693394" name="bestCourses" />
+        <set-variable value="#[attributes.queryParams.name]" doc:name="Set Variable" doc:id="15f0e928-9837-473d-b192-30683930314f" variableName="name"/>
+		<flow-ref doc:name="bestCourses" doc:id="80aba85d-3db9-4059-83b0-42aa9c693394" name="bestCourses" />
     </flow>
     <flow name="get:\learncart:application\json:learncart-config">
         <set-variable value="#[attributes.queryParams.sort]" doc:name="Set Variable" doc:id="7c9f465c-bb1e-4ebd-94b0-5fb4bcaea105" variableName="sort" />

@@ -762,7 +762,7 @@ payload map ( payload01 , indexOfPayload01 ) -> {
 	duration: payload01.duration default "",
 	author: payload01.author default "",
 	price: payload01.price default 0,
-	name: (payload01.price as String default "") ++ (payload01.name default "")
+	name: (payload01.name default "")
 }]]></ee:set-payload>
                     </ee:message>
                 </ee:transform>
@@ -820,6 +820,20 @@ output application/json
 				</ee:transform>
 			</on-error-propagate>
 		</error-handler>
+    
+	</flow>
+	<flow name="subscribedCourses" doc:id="c5bd67bf-f0ff-47b9-8981-47d215c68a16" >
+	     <ee:transform xsi:schemaLocation=" http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Course Added"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <logger level="INFO" doc:name="Logger" doc:id="8b121047-da86-4210-92bb-b9b8e964df70" message="Added into cart" />
     
 	</flow>
 </mule>
