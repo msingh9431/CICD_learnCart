@@ -1,0 +1,14 @@
+[
+  {
+    "name": "harry",
+    "author": "JK",
+    "duration": "2hrs",
+    "price": 199 
+  },
+  {
+    "name": " JJ",
+    "author": "jk" ,
+    "duration": "21",
+    "price": 123 
+  }
+]

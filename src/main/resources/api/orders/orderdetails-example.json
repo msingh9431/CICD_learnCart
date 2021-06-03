@@ -1,0 +1,16 @@
+[
+  {
+    "orderid": "C1",
+    "courseid": "CQ",
+    "courseprice": 299,
+    "rating": "4 star",
+    "review": "The course contained all the theories, should cover practical also"
+  },
+  {
+    "orderid": "CE3",
+    "courseid": "C4",
+    "courseprice": 299,
+    "rating": "4 star",
+    "review": "The course contained all the theories, should cover practical also"
+  }
+]

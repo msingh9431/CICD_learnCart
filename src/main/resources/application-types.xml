@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="courseid" format="json">
+      <types:shape format="weave" example="examples/ex.json"><![CDATA[%dw 2.0
+
+type courseid = {| courseid: String |} {"example": "{\\\"courseid\\\":\\\"C2\\\"}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="totalprice" format="json">
+      <types:shape format="weave" example="examples/ex1.json"><![CDATA[%dw 2.0
+
+type totalprice = {|
+  total_price: Number {"typeId": "int"}, 
+  "cart-items": Array<{|    courseid: Number {"typeId": "int"},     coursename: String,     courseprice: Number {"typeId": "int"}  |}>
+|} {"example": "{\\\"total_price\\\":3400,\\\"cart-items\\\":[{\\\"courseid\\\":201,\\\"coursename\\\":\\\"Java\\\",\\\"courseprice\\\":2000},{\\\"courseid\\\":201,\\\"coursename\\\":\\\"Java\\\",\\\"courseprice\\\":2000}]}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#a848f343-c093-46da-be35-e69e3a275508">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="totalprice"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

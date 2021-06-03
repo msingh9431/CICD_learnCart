@@ -1,0 +1,101 @@
+#%RAML 1.0 Library
+resourceTypes:
+  userCollection:
+    post: 
+      is : [errorResponse]
+      description: milestone2
+      body:
+        application/json:
+            type: adduser
+            example: !include ../users/adduser-example.json
+                  
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include ../users/adduser200Response-example.json
+               
+        
+    put:
+      is : [errorResponse]
+      queryParameters:
+        uid:
+          type: string
+          required: true
+          example: "Sam01"
+      body:
+        application/json:
+          type: adduser
+          example: !include ../users/adduser-example.json
+            
+      responses:
+        200:
+           body:
+            application/json:
+              example: !include ../users/updateuser200Response.json
+               
+    get:
+      is : [errorResponse]
+      description: Milestone5
+      queryParameters:
+        uid:
+          type: string
+          required: true
+          example: "sam01"
+      responses:
+        200:
+          body:
+            application/json:
+              type: array
+              items:
+                type: object
+                properties:
+                  displayname:
+                    type: string
+                    required: true
+                    example: "J01"
+                  firstname:
+                    type: string
+                    required: true
+                    example: "James"                
+                  lastname:
+                    type: string
+                    required: true
+                    example: "Rowling"
+                  bio:
+                    type: string
+                    required: true
+                    example: "gggggggggg"
+                  usertype:
+                    type: string
+                    required: true
+                    example: "student"
+                  experience:
+                    type: integer
+                    required: true
+                    example: 2
+                  Coursedetails:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        required: true
+                        example: "Harry"
+                      description:
+                        type: string
+                        required: true
+                        example: "Entertainment"                
+                      author:
+                        type: string
+                        required: true
+                        example: "JK Rowling"
+                      Price:
+                        type: number
+                        required: true
+                        example: 2000
+                      Duration:
+                        type: string
+                        required: true
+                        example: "2hrs"
+              
+              example: !include ../course/getcoursedetails200Response-example.json

@@ -1,0 +1,44 @@
+#%RAML 1.0 DataType
+type: object
+properties:
+  displayname:
+    type: string
+    required: true
+    example: "sam01"
+  firstname:
+    type: string
+    required: false
+    example: "sam"
+  lastname:
+    type: string
+    required: false
+    example: "andrew"
+  interests:
+    type: string
+    example: 'java'
+    required: false
+  usertype:
+    type: string
+    example: 'professional'
+    required: false
+  experience:
+    type: number
+    example: 2
+    required: false
+  role:
+    type: string
+    example: 'developer'
+    required: false
+  domain:
+    type: string
+    example: 'technical'
+    required: false
+  bio:
+    type: string
+    example: 'experience in front end development'
+    required: false
+  mobileno:
+    type: integer
+    minimum: 10
+    example: 7328036892
+    required: true

@@ -1,0 +1,20 @@
+ {
+     "displayname": "sam01",
+     "firstname": "sam",
+     "lastname": "andrew",
+     "bio": "hhhhh",
+     "experience": 2 ,
+     "usertype": "student" ,
+     "Coursedetails": [{
+       "Duration": "2",
+       "Price": 199 ,
+       "author": "JK",
+       "description": "JJJJ",
+       "name": "hjk"
+     },{
+       "Duration": "3",
+       "Price": 1999 ,
+       "author": "op",
+       "description": "hjnjk",
+       "name": "James"
+     }]}

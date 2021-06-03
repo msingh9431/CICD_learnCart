@@ -1,0 +1,382 @@
+#%RAML 1.0
+title: learnCart
+description: Welcome to Learncart
+
+uses:
+  courseAssigned: /libraries/adduser-library.raml
+  usersdetails: resource-types/welcomeuser.raml
+  handlingcourses: resource-types/courses-library.raml
+  
+types:
+  commonError: !include /libraries/common/datatypes/common-error-dataType.raml
+  adduser: !include /users/addUser-dataType.raml
+  subscription: !include /users/datatype/subscription-dataType.raml
+  orderdetails: !include /orders/orderdetails-dataType.raml
+  course: !include /course/course-dataType.raml
+  courseresponse: !include /cart/cartResponse200-dataType.raml
+  order: !include /orders/ordercreate-dataType.raml
+  orderResponse: !include /orders/orderResponse-dataType.raml
+  usersandsubscribedcourses: !include /users/datatype/users-courses-details.raml
+  coursedetails: !include /course/course-details.raml
+  learncart: !include /course/learncart-datatype.raml
+  learncart-response-datatype: !include /course/learncart200Response-dataType.raml
+  bestCourses-response-datatype: !include /course/bestcourses200Response-dataType.raml
+
+
+
+traits:
+  errorResponse: !include /traits/errorTrait.raml
+
+/user:
+  post: 
+    is : [errorResponse]
+    description: Adding users to learnCart
+    body:
+      application/json:
+          type: adduser
+          example: !include /users/adduser-example.json
+                
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include /users/adduser200Response-example.json
+  put:
+    is : [errorResponse]
+    description: Updating users details to learnCart
+    body:
+      application/json:
+        type: adduser
+        example: !include /users/adduser-example.json 
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include /users/updateuser200Response.json        
+  get:
+    is : [errorResponse]
+    description: Milestone5
+    queryParameters:
+      uid:
+        type: string
+        required: true
+        example: "sam01"
+    responses:
+      200:
+        body:
+          application/json:
+            type: usersandsubscribedcourses
+            example: !include /course/getcoursedetails200Response-example.json
+  /{id}:
+     /subscription:
+       post:
+          is : [errorResponse]
+          description: Milestone8
+          body:
+            application/json:
+                type: subscription
+                example: !include /course/deletecourse-example.json
+          responses:
+            200:
+               body:
+                application/json:
+                  example: !include /course/courseadd200Response-example.json
+       delete:
+          is : [errorResponse]
+          description: Milestone9
+          body:
+            application/json:
+              type: subscription
+              example: !include /course/deletecourse-example.json
+          responses:
+            200:
+               body:
+                application/json:
+                  example: !include /course/coursedelete200Response-example.json
+     /cart:
+        post:
+          is : [errorResponse]
+          description: Milestone10
+          queryParameters:
+            name:
+              type: string
+              required: true
+              example: "Harry Potter"
+          responses:
+            200:
+              body:
+                application/json:
+                  example: !include /cart/cart200Response-example.json
+        delete:
+          is : [errorResponse]
+          description: MS10
+          queryParameters:
+            name:
+              type: string
+              required: true
+              example: "Harry potter"
+          responses:
+            200: 
+             body:
+              application/json:
+                example: !include /cart/deletecourse200Resonse-example.json
+     /orderdetails:
+        post:
+          is : [errorResponse]
+          description: Milestone16
+          body:
+            application/json:
+              type: orderdetails
+              example: !include /orders/orderdetails-example.json
+          responses:
+            200:
+              body:
+                application/json:
+                  example: !include /orders/orderdetails200response-example.json
+      
+     /wishlist:
+      post:
+         is : [errorResponse]
+         description: add courses to wishlist
+         body:
+          application/json:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "Harry Potter"
+                required: true
+            example:
+              {
+                name: "Harry Potter"
+              }
+         responses:
+           200:
+            body:
+              application/json:
+                example:
+                  {
+                      "message" : "Your course have been added to wishlist"}
+          
+      get:
+        is : [errorResponse]
+        description: Items of wishlist
+        responses:
+          200:
+            body:
+              application/json:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    coursename:
+                      type: string
+                      required: true
+                      example: "Java"
+                    price: 
+                      type: integer
+                      required: true
+                      example: 300
+                    author:
+                      type: string 
+                      required: true
+                      example: "JK"
+                    duration: 
+                      type: string
+                      required: true
+                      example: "3"
+                example:
+                  [
+                    {
+                      coursename: "Java",
+                      author: "JK",
+                      duration: "2" ,
+                      price: 299,
+                    },
+                    {
+                      coursename: "Java",
+                      author: "JK",
+                      duration: "2" ,
+                      price: 299,
+                    }
+                  ]
+               
+
+
+/course:
+  post:
+      is : [errorResponse]
+      description: Mieleston6
+      body:
+        application/json:
+            type: course
+            example: !include /course/course-example.json
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include /course/courseadd200Response-example.json
+  delete:
+    is : [errorResponse]
+    description: Milestone7
+    body:
+      application/json:
+          type: object
+          properties:
+            name:
+              type: string
+              example: "ORACLE SOA"
+              required: true
+          example: 
+            {
+            "name": "Harry Potter"
+            }
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include /course/coursedelete200Response-example.json
+  get:
+    is : [errorResponse]
+    description: Milestone17
+    queryParameters:
+      coursename:
+        type: string
+        example: "JAVA"
+        required: true
+    responses:
+      200:
+        body:
+          application/json:
+            type: coursedetails
+            example: !include /course/coursedetailsResponse200-example.json
+/wishlist:
+  /user:
+    /{id}:
+      /cart: 
+        post:
+          is : [errorResponse]
+          description: Milestone12
+          queryParameters:
+            coursename:
+              type: string
+              required: true
+              example: "Harry potter"    
+          responses:
+            200:
+              body:
+                application/json:
+                  example: !include /cart/wishlist-cart-200Response-example.json
+/cart:
+  /user:
+    get:
+      is : [errorResponse]
+      description: Milestone13
+      queryParameters:
+        id:
+          type: string
+          required: true
+          example: "C12"
+      responses:
+        200:
+          body:
+            application/json:
+              type: courseresponse
+              example: !include /cart/cartdetails200Response-example.json
+  /cartvalue:
+    get:
+      is : [errorResponse]
+      queryParameters:
+        id:
+          type: string
+          required: true
+          example: "V1"
+      responses:
+        200:
+          body:
+            application/json:
+              type: object 
+              properties:
+                userid: 
+                  type: string
+                  required: true
+                  example: "C2"
+                totalprice:
+                  type: integer
+                  required: true
+                  example: 102
+              example:
+                {
+                  userid: "C1",
+                  totalprice: 134
+                }
+
+/order:
+  /user:
+    post:
+      is : [errorResponse]
+      description: Milestone18- create order
+      queryParameters:
+        id:
+          type: string
+          required: true
+          example: "C12"
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include /orders/createorder200Response-example.json
+    get:
+      is : [errorResponse]
+      description: Milestone18- display order
+      queryParameters:
+        id:
+          type: string
+          required: true
+          example: "C12"
+      responses:
+        200:
+          body:
+            application/json:
+              type: orderResponse
+              example: !include /orders/displayorder200Response-example.json       
+/learncart:
+  get:
+    is : [errorResponse]
+    queryParameters:
+      sort:
+        type: string
+        required: true
+        example: "LH"
+    body:
+      application/json:
+        type: learncart
+    responses:
+      200:
+        body:
+          application/json:
+            type: learncart-response-datatype
+            example: !include /course/learncart200Response-example.json
+  /bestcourses:
+    get:
+      is : [errorResponse]
+      queryParameters:
+        name:
+         type: string
+         example: "java"
+         required: true
+      responses:
+        200:
+          body:
+            application/json:
+              type: bestCourses-response-datatype
+              example: !include /course/bestcourse200response-example.json
+
+           
+            
+
+      
+  
+      
+          
+    

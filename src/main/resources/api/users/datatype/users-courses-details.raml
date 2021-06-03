@@ -1,0 +1,52 @@
+#%RAML 1.0 DataType
+type: object
+properties:
+  displayname:
+    type: string
+    required: true
+    example: "J01"
+  firstname:
+    type: string
+    required: true
+    example: "James"                
+  lastname:
+    type: string
+    required: true
+    example: "Rowling"
+  bio:
+    type: string
+    required: true
+    example: "gggggggggg"
+  usertype:
+    type: string
+    required: true
+    example: "student"
+  experience:
+    type: integer
+    required: true
+    example: 2
+  Coursedetails:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+          required: true
+          example: "Harry"
+        description:
+          type: string
+          required: true
+          example: "Entertainment"                
+        author:
+          type: string
+          required: true
+          example: "JK Rowling"
+        Price:
+          type: number
+          required: true
+          example: 2000
+        Duration:
+          type: string
+          required: true
+          example: "2hrs"

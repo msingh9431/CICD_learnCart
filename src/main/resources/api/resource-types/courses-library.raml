@@ -1,0 +1,70 @@
+#%RAML 1.0 Library
+resourceTypes:
+  coursesinfo:
+    post:
+      is : [errorResponse]
+      description: Mieleston6
+      body:
+        application/json:
+            type: course
+            example: !include ../course/course-example.json
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include ../course/courseadd200Response-example.json
+    delete:
+      is : [errorResponse]
+      description: Milestone7
+      body:
+        application/json:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "ORACLE SOA"
+                required: true
+            example: 
+              {
+                "name": "harry Potter"
+              }
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include ../course/coursedelete200Response-example.json
+    get:
+      is : [errorResponse]
+      description: Milestone17
+      queryParameters:
+        coursename:
+          type: string
+          example: "JAVA"
+          required: true
+      responses:
+        200:
+          body:
+            application/json:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "ORACLE SOA"
+                  required: true
+                description:
+                  type: string
+                  required: true
+                  example: "Middleware integration tool"                
+                author:
+                  type: string
+                  required: true
+                  example: "Arun"
+                Price:
+                  type: number
+                  required: true
+                  example: 2000
+                Duration:
+                  type: string
+                  required: true
+                  example: "8hrs"
+              example: !include ../course/coursedetailsResponse200-example.json

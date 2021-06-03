@@ -1,0 +1,825 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	
+
+	<flow name="createOrder" doc:id="6944e7ac-2db1-4d7c-a77f-3f41b9cb0b91" >
+	<db:insert doc:name="Insert" doc:id="36a184d6-c6a2-4dee-a812-32e34c20dcbc" config-ref="Database_Config1">
+			<db:sql ><![CDATA[insert into public."Orders"(userid,orderprice) select userid, sum(price) from cart where userid= :uid group by userid;
+
+insert into orderdetails (courseid, courseprice) select courseid, price from cart where userid= :uid]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	uid: vars.id
+}]]]></db:input-parameters>
+		</db:insert>
+		<logger level="INFO" doc:name="Logger" doc:id="19006557-0e4c-4d9e-9d28-cce960044fd5" message="*******Order created*********"/>
+		<db:delete doc:name="Delete" doc:id="4746597a-a5b5-402e-8f6e-690dea5ec497" config-ref="Database_Config1">
+			<db:sql ><![CDATA[delete from cart where userid= :uid]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	uid: vars.id
+}]]]></db:input-parameters>
+		</db:delete>
+		<logger level="INFO" doc:name="Logger" doc:id="8d8f6641-5e7b-4d86-aa7e-fa08244569e5" message="deleted from table cart"/>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Your order has been created"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="2d51c55e-fc32-4e41-8132-418d97768a8f" message="#[payload]"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="3d4de625-a94a-4d9f-9c54-65d74a4824b4" type="DB:BAD_SQL_SYNTAX, DB:CONNECTIVITY, DB:QUERY_EXECUTION">
+				<logger level="INFO" doc:name="Logger" doc:id="571fcfcf-fbb6-49c7-a8ff-47bc30f9eca9" message="#[error.errorMessage]"/>
+				<ee:transform doc:name="Transform Message" doc:id="94704aee-fbcc-4ab8-aa09-af4fd402f5ac" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"message": "SQL Error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="addCourse" doc:id="d41d59bd-d487-4171-9540-9ae2780e47e7" >
+	<logger level="INFO" doc:name="Logger" doc:id="bc144ef0-5875-4e3f-9269-a1c3d58865a8" message="***************Adding Courses***********"/>
+		<db:insert doc:name="Insert" doc:id="379bddcf-8bf8-40f4-ba9b-534459ebf1aa" config-ref="Database_Config1">
+			<db:sql ><![CDATA[insert into course (name,description,author,Price,Duration) values (:name, :description, :author, :Price, :Duration)
+]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	name: payload.name,
+	description: payload.description,
+	author: payload.author,
+	Price: payload.Price,
+	Duration: payload.Duration
+}]]]></db:input-parameters>
+		</db:insert>
+		<logger level="INFO" doc:name="Logger" doc:id="ddfdde8f-befa-491d-9057-70e87bb84b3c" message="#[payload]" />
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Course Added"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="7c49836f-3d56-44a6-99b4-fd924b73d715" type="DB:BAD_SQL_SYNTAX, DB:CONNECTIVITY, DB:QUERY_EXECUTION, EXPRESSION">
+				<logger level="INFO" doc:name="Logger" doc:id="12bc2938-3995-4ceb-b49e-926687446ea3" message="#[error.errorMessage]"/>
+				<ee:transform doc:name="Transform Message" doc:id="070e8435-79a0-4533-8b74-1beec5240fa0" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"message": "SQL Error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			
+</on-error-propagate>
+		</error-handler>
+	</flow>
+	
+	<flow name="deleteCourse" doc:id="d2742a2d-bf82-4990-9d24-de899fb6e4ef" >
+	<logger level="INFO" doc:name="Logger" doc:id="e276d645-cfa7-4cd5-9130-83e4c75075d4" message="*********************Deleting Requested Course********************"/>
+		<db:delete doc:name="Delete" doc:id="98edb25f-5d37-4edd-8621-36929d9c95c2" config-ref="Database_Config">
+			<db:sql ><![CDATA[delete from course where name= :name]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	name: payload.name
+}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Course deleted "
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="7dbc6883-2799-4a8a-b5af-1187c2a8282f" message="#[payload]"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="cb3a6b3d-7825-4f83-83b9-90973f18ded8" type="ANY">
+				<logger level="INFO" doc:name="Logger" doc:id="1f078e33-536e-441b-af47-a8824951c28e" message="#[error.errorMessage]"/>
+				<ee:transform doc:name="Transform Message" doc:id="3e3f26c3-a201-40bc-90f9-e8175efda9f8" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"message": "SQL Error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			
+</on-error-propagate>
+		</error-handler>
+	</flow>
+	
+	<flow name="courseDetails" doc:id="5a9a5dd3-c60e-44c3-84eb-64a1ca5269ed" >
+	<logger level="INFO" doc:name="Logger" doc:id="2abdcd02-bec1-4fc2-8349-a9b729f30e8e" message="#[payload]"/>
+		<db:select doc:name="Select" doc:id="173bb55f-229c-498a-91ff-db2082d7326c" config-ref="Database_Config1">
+			<db:sql ><![CDATA[select * from course where name= :cname]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	cname: vars.coursename
+}]]]></db:input-parameters>
+		</db:select>
+		<logger level="INFO" doc:name="Logger" doc:id="44704be7-e3f7-4afd-ae9e-24d1f3cbce80" message="****Displaying the course details to user****"/>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	name: payload.name reduce ($$ ++ $),
+	description:payload.description reduce ($$ ++ $),
+	author: payload.author reduce ($$ ++ $),
+	Price: payload.price reduce ($$ ++ $),
+	Duration: payload.duration reduce ($$ ++ $)
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="b74f97de-d070-43a0-8488-3230311fb6c1" message="#[payload]"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="7c5d3408-1b17-431c-a94e-977b94d1b546" type="DB:BAD_SQL_SYNTAX, DB:CONNECTIVITY, DB:QUERY_EXECUTION, EXPRESSION">
+				<logger level="INFO" doc:name="Logger" doc:id="31214f4f-bc36-479f-a3c5-898dff68f90f" message="#[error.errorMessage]"/>
+				<ee:transform doc:name="Transform Message" doc:id="ac540596-fea2-418e-9812-9dd5d0fed61b" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"message": "DB Error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			
+</on-error-propagate>
+		</error-handler>
+	</flow>
+	
+	<flow name="addUser" doc:id="4667001d-9ab5-42df-8a2e-0f50ea87a93a" >
+	<logger level="INFO" doc:name="Logger" doc:id="18b8b2b8-4b8e-4ae7-99b8-0c4cf5365cc6" message="The flow has started"/>
+		<db:insert doc:name="Insert" doc:id="68d222bb-0a81-4fbe-9334-eb540bd440fc" config-ref="Database_Config1">
+			<db:sql ><![CDATA[insert into users (displayname, firstname, lastname, bio, interests, usertype, experience, domain, role, phone_no) 
+values(:displayname, :firstname, :lastname, :bio, :interests, :usertype, :experience, :domain, :role)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	"displayname": payload.displayname,
+	"firstname": payload.firstname,
+	"lastname": payload.lastname,
+	"bio":payload.bio,
+	"interests": payload.interests,
+	"usertype": payload.usertype,
+	"experience": payload.experience,
+	"domain": payload.domain,
+	"role": payload.role
+	}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "User created "
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="ddb1e1d2-a238-4531-82b8-f46d376206a6" message="#[payload]"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="2f254c1c-7237-4e88-a40d-f1c9d5c92c6a" type="DB:BAD_SQL_SYNTAX, DB:CONNECTIVITY, DB:QUERY_EXECUTION">
+				<logger level="INFO" doc:name="Logger" doc:id="36006088-f199-4ccb-b871-ad782c391f23" message="#[error.errorMessage]"/>
+				<ee:transform doc:name="Transform Message" doc:id="f6ef8715-ae61-465b-b843-6a06a2c43d64" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"message": "DB Error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			
+</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="updateUser" doc:id="d726b065-00d7-4ce2-97ee-322ce0607b0b" >
+	<logger level="INFO" doc:name="Logger" doc:id="09e99f7a-aecd-428f-aa99-0b157ffd73d0" message="******************Updating User******************"/>
+		<db:update doc:name="Update" doc:id="bab2e50c-b8ef-494c-a9e1-f8c6e88cb099" config-ref="Database_Config1">
+			<db:sql ><![CDATA[update users set firstname = :firstname, lastname= :lastname, bio= :bio, interests = :interests, usertype= :usertype, experience= :exp, domain= :domain, role= :role where id= :uid
+]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	"uid": vars.uid,
+	"displayname": payload.displayname,
+	"firstname": payload.firstname,
+	"lastname": payload.lastname,
+	"bio":payload.bio,
+	"interests": payload.interests,
+	"usertype": payload.usertype,
+	"exp": payload.experience,
+	"domain": payload.domain,
+	"role": payload.role
+	}]]]></db:input-parameters>
+		</db:update>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "User details have been updated successfully"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="63bda47f-f063-4cfa-ba33-d258a524e425" message="#[payload]"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="02697771-49a2-45af-98a7-2a02535a1100" type="DB:BAD_SQL_SYNTAX, DB:CONNECTIVITY, DB:QUERY_EXECUTION">
+				<logger level="INFO" doc:name="Logger" doc:id="e10fb71c-66d4-4fab-885d-cbd642d63b5f" message="#[error.errorMessage]"/>
+				<ee:transform doc:name="Transform Message" doc:id="3d3fe2e0-16fa-476e-ab5b-de40fd607515" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"message": " Error occured while updating user"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			
+</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="addReviewAndRatings" doc:id="f3a18ad2-0860-4c68-8a06-bf2837a130b2" >
+	
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Thanks for review"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="e4aa7f4e-cc50-4a51-8111-9711e6eda324" message="#[payload]"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="88028837-464a-4512-88ba-64dbff740c7f" type="ANY">
+				<logger level="INFO" doc:name="Logger" doc:id="84bed985-8c72-4827-a7e4-28ee73d14924" message="#[error.errorMessage]"/>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	
+	
+	<flow name="usersAndSubscribedCourseDetails" doc:id="d10c36ff-99d1-41e9-920d-5e3bc9dd1cbd" >
+	<logger level="INFO" doc:name="Logger" doc:id="52f775c2-a200-4479-9449-bab6b3d138d1" message="**************Fetching Details*******************"/>
+		<db:select doc:name="Select" doc:id="c2cd763e-994a-490f-b3f8-7bb1eb81905b" config-ref="Database_Config1">
+			<db:sql ><![CDATA[select u.*,t.* from users u join (select :uid as userid, c.* from orderdetails o,course c where o.courseid=c.courseid and o.orderid in (select orderid from public."Orders" where userid =:uid)) t on u.id=t.userid
+]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	uid: vars.userid
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	firstname: payload01.firstname default "",
+	displayname: payload01.displayname default "",
+	bio: payload01.bio default "",
+	usertype: payload01.usertype default "",
+	experience: payload01.experience default 0,
+	lastname: payload01.lastname default "",
+	Coursedetails: {
+		Price: payload01.price default 0,
+		author: payload01.author default "",
+		name: payload01.name default "",
+		description: payload01.description default "",
+		Duration: payload01.duration default ""
+	}
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="968189fc-1d13-4740-bc46-8302a1be206e" message="#[payload]"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="12c1c03b-87f1-48c3-8ec2-08843f5a69a4" type="DB:BAD_SQL_SYNTAX, DB:CONNECTIVITY, DB:QUERY_EXECUTION, EXPRESSION">
+				<logger level="INFO" doc:name="Logger" doc:id="039ab64b-f3f6-4c7f-8056-4bec155ff18d" message="#[error.errorMessage]"/>
+				<ee:transform doc:name="Transform Message" doc:id="5070e82b-3980-4a45-98a0-417b6b63efaf" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"message": "DB Error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			
+</on-error-propagate>
+		</error-handler>
+	</flow>
+	
+	
+	<flow name="courseAddedInCart" doc:id="a1786ee0-41f2-42d7-a994-ceab3da5a88f" >
+		<logger level="INFO" doc:name="Logger" doc:id="fa7c42f7-2d92-43fe-a2f2-9a9d92d19973" message="#[vars.name]"/>
+        <db:select doc:name="Select" doc:id="3db58a5d-ef84-48a7-bc16-dc2203188cbf" config-ref="Database_Config1">
+			<db:sql ><![CDATA[select courseid from course where name= :cname]]></db:sql>
+			<db:input-parameters ><![CDATA[#[output application/java
+---
+{
+	cname: vars.name 
+}]]]></db:input-parameters>
+		</db:select>
+		<logger level="INFO" doc:name="Logger" doc:id="13c4c871-b7af-4c13-8379-9b53bb0f59bb" message="****Adding Course to user's Cart****"/>
+		<db:insert doc:name="Insert" doc:id="22c3e82d-f3cb-423a-9b22-8751c5f84a78" config-ref="Database_Config1">
+			<db:sql ><![CDATA[insert into cart(userid, courseid, price) values (:userId,:courseid,(select price from course where name= :name2))
+]]></db:sql>
+			<db:input-parameters ><![CDATA[#[output application/java
+---
+{
+	userId: (vars.userId default ""),
+	courseid: payload.courseid reduce ($$ ++ $),
+	name2: vars.name
+}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Course added to cart"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="bff25a0d-1e6f-4586-ad06-5f1a4a5e9492" message="#[payload]"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="011bad04-df57-4826-adfd-885c6928d36d" type="DB:BAD_SQL_SYNTAX, DB:CONNECTIVITY, DB:QUERY_EXECUTION, DB:RETRY_EXHAUSTED">
+				<logger level="INFO" doc:name="Logger" doc:id="b6673ede-93eb-46e0-b08b-8ac7770bbe99" message="#[error.errorMessage]"/>
+				<ee:transform doc:name="Transform Message" doc:id="04aee73d-b8c0-48af-81bb-479f40285085" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"message": "DB Error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			
+</on-error-propagate>
+		</error-handler>
+	</flow>
+	
+	<flow name="deleteCoursesFromCart" doc:id="50f9701f-907a-48f6-9e0f-90cb4a7ef23e" >
+	<logger level="INFO" doc:name="Logger" doc:id="379cb6fd-9900-4d90-9ace-5df969233671" message="********Searching DB**********"/>
+		<db:select doc:name="Select" doc:id="50dd9827-2fe8-45bd-a400-93d71b73676d" config-ref="Database_Config1">
+			<db:sql ><![CDATA[select courseid from course where name= :cname]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	cname: vars.coursename
+}]]]></db:input-parameters>
+		</db:select>
+		<logger level="INFO" doc:name="Logger" doc:id="10087a4a-032e-44c9-baa0-933e36359346" message="***Removing Course from the cart of the requested user***"/>
+		<db:delete doc:name="Delete" doc:id="bd116573-ed78-4b0c-8c5d-42b30b61bacb" config-ref="Database_Config1">
+			<db:sql ><![CDATA[delete from cart where userid= :uid and courseid=(select courseid from course where name= :cname1)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	uid: vars.Uid,
+	cname1: vars.coursename
+	
+}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+
+ message: "Course removed from cart"
+]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="71ef12bc-2e5e-4736-94bd-ee3dc03f3a22" message="#[payload]"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="421f52fd-25e7-44ac-9301-926645a9458d" type="DB:BAD_SQL_SYNTAX, DB:CONNECTIVITY, DB:QUERY_EXECUTION, DB:RETRY_EXHAUSTED">
+				<logger level="INFO" doc:name="Logger" doc:id="3a3c7072-2e2f-4547-8582-5e61ac1daf0c" message="#[error.errorMessage]"/>
+				<ee:transform doc:name="Transform Message" doc:id="4d2adf7e-70d9-4a78-b12c-50f0f999e36d" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"message": "DB Error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			
+</on-error-propagate>
+		</error-handler>
+	</flow>
+	
+	<flow name="contentOfCart" doc:id="a315b9bc-48b6-4c27-94b8-b6c51e21aa89" >
+		<scatter-gather doc:name="Scatter-Gather" doc:id="da1b9952-827f-4dc8-a6ca-685408ef621f" >
+			<route >
+				<db:select doc:name="Select" doc:id="82a998e5-2c87-4e14-a5b1-e20e54f1dac8" config-ref="Database_Config1">
+            <db:sql><![CDATA[select c.userid, sum(cs.price), c.courseid, c.price, cs.name from cart c , course cs where c.courseid = cs.courseid and c.userid= :uid group by c.userid, c.courseid, c.price, cs.name]]></db:sql>
+            <db:input-parameters><![CDATA[#[{
+	uid: vars.userid
+}]]]></db:input-parameters>
+        </db:select>
+			</route>
+			<route >
+				<db:select doc:name="Select" doc:id="f6bfb3b5-913d-4cba-9069-f43fdfa3b635" config-ref="Database_Config1">
+					<db:sql ><![CDATA[select sum(price) totalprice from cart where userid= :uid group by userid;
+]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{
+	uid: vars.userid
+}]]]></db:input-parameters>
+				</db:select>
+			</route>
+		</scatter-gather>
+        <ee:transform doc:name="Transform Message" doc:id="bf2dc669-741b-457e-9ec7-f668ce4734e3">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	total_price: (payload."1".payload[0].totalprice default 0),
+	"cart-items": payload."0".payload map ( payload01 , indexOfPayload01 ) -> {
+		coursename: payload01.name default "",
+		courseprice: payload01.price default 0,
+		courseid: payload01.courseid default ""
+	}
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="109c6ce4-8f21-4d47-8268-5e6cf10aad33" message="#[payload]"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="be16d428-840b-4b1d-ab65-8db64d752d24" type="DB:BAD_SQL_SYNTAX, DB:CONNECTIVITY, DB:QUERY_EXECUTION, EXPRESSION">
+				<logger level="INFO" doc:name="Logger" doc:id="b8c24887-a93d-4ee1-99b1-cf9e83abb0b3" message="#[error.errorMessage]"/>
+				<ee:transform doc:name="Transform Message" doc:id="18a8df6c-4eb9-494d-a2ce-aa96a75c352c" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"message": "DB Error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			
+</on-error-propagate>
+		</error-handler>
+	</flow>
+	
+	<flow name="moveCoursesFromWishlistToCart" doc:id="ddcbd4a6-c0c2-4ed3-bf2d-66076f813074" >
+	<choice doc:name="Choice" doc:id="5bbe450f-6266-4d3d-855f-0b38760ee962" >
+			<when expression='#[vars.coursename == "All"]'>
+				<db:insert doc:name="Insert" doc:id="745b422e-843c-4e7e-bab4-1f9214a2aeac" config-ref="Database_Config">
+			<db:sql><![CDATA[insert into cart (userid,courseid,price) select w.userid,w.courseid,c.price from wishlist w , course c where w.courseid=c.courseid and w.userid=:uid]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+	uid: vars.uid
+}]]]></db:input-parameters>
+		</db:insert>
+				<logger level="INFO" doc:name="Logger" doc:id="dfd9d66f-e15c-4d2b-abba-938558ad3a8f" message="*****Added to cart *****" />
+				<db:delete doc:name="Delete" doc:id="49f775f5-7d87-4b0e-8ab3-9639c65b4ec0" config-ref="Database_Config">
+			<db:sql><![CDATA[delete from wishlist where userid= :uid]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+	uid: vars.uid
+}]]]></db:input-parameters>
+		</db:delete>
+				<logger level="INFO" doc:name="Logger" doc:id="ae58f273-e0a5-4830-8a36-df2d2d9e3162" message="********Item has been removed from wishlist and added to cart********" />
+				<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Course has been moved from wishlist to cart"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+				<logger level="INFO" doc:name="Logger" doc:id="4a990d1f-cf57-4cec-9b67-dcded1a5406d" message="#[payload]"/>
+			
+</when>
+			<otherwise >
+				<db:insert doc:name="Insert" doc:id="be71cf68-09b0-4cfd-be6f-d6550d7f0dec" config-ref="Database_Config">
+					<db:sql ><![CDATA[insert into cart (userid,courseid,price) select w.userid,w.courseid,c.price from wishlist w , course c where w.courseid=c.courseid and w.userid=:uid and c.name= :cname]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{
+	uid: vars.uid,
+	cname: vars.coursename
+}]]]></db:input-parameters>
+				</db:insert>
+				<logger level="INFO" doc:name="Logger" doc:id="1e01a5f6-994b-4cc1-9513-82e5628f48f4" message="******** Course have been added into wishlist **************"/>
+				<db:delete doc:name="Delete" doc:id="fa9df5b1-2376-4ac4-8d49-edf04f7835a6" config-ref="Database_Config">
+					<db:sql ><![CDATA[delete from wishlist where userid= :uid and Courseid in (select courseid from course where name= :cname)]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{
+	uid: vars.uid,
+	cname: vars.coursename
+}]]]></db:input-parameters>
+				</db:delete>
+				<logger level="INFO" doc:name="Logger" doc:id="06dcb171-759c-41b4-a51f-21192f4c318c" message="*******Course have been removed from user's wishlist******"/>
+				<ee:transform doc:name="Transform Message" doc:id="6dc95b6b-9cf9-49c2-afe4-e065ffa22fc4" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[output application/json
+---
+{
+  message: "Course has been moved from wishlist to cart"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<logger level="INFO" doc:name="Logger" doc:id="e02ec6fe-942d-4842-a498-9acd5f04f50f" message="#[payload]"/>
+			
+</otherwise>
+		</choice>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="33c8da20-e178-48bd-bb88-d6e681e6b3e2" type="ANY">
+				<logger level="INFO" doc:name="Logger" doc:id="f19523b0-6229-48f3-a985-8896076c9cf6" message="#[error.errorMessage]"/>
+				<ee:transform doc:name="Transform Message" doc:id="7dab8c5f-dadb-478f-b540-c7e7f8f083f8" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"message": "DB Error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			
+</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="addToWishlist" doc:id="ea8d74c9-4625-46e5-a678-f4af75882ae0" >
+	<logger level="INFO" doc:name="Logger" doc:id="02e49906-6550-4ad2-9677-24d3659e9bb8" message="*********Adding into users wishlist****************"/>
+		<db:insert doc:name="Insert" doc:id="2b6247f9-7623-4999-96f9-e434806ac792" config-ref="Database_Config1">
+			<db:sql ><![CDATA[insert into wishlist (userid, courseid) values(:uid, (select courseid from course where name = :cname))]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	uid: vars.uid,
+	cname: payload.name
+}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Your course have been added to wishlist"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="f1e483df-22bf-43c0-9ce8-e56f8bf19cb4" >
+				<logger level="INFO" doc:name="Logger" doc:id="71a244b6-1c95-4ae7-af47-c398c19ec030" message="#[error.errorMessage]"/>
+				<ee:transform doc:name="Transform Message" doc:id="af11295b-ec56-43c1-b4f9-94fb73423101" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"message": "DB Error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="deleteFromCart" doc:id="06416b7a-934a-49ab-89e9-e6a8f8cbd203" >
+	 <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Course deleted "
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="7daf2d94-af34-4fd3-9b9c-795f86a60c24" >
+				<logger level="INFO" doc:name="Logger" doc:id="375c9850-4226-43e0-89a3-67209369e2e0" message="#[error.errorMessage]"/>
+				<ee:transform doc:name="Transform Message" doc:id="d02d93ae-c9a9-4e65-8bc8-78b2469e0bf1" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"message": "DB Error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="displayOrders" doc:id="c61171c3-e577-43a8-9923-c00c7b0adaa8" >
+	<logger level="INFO" doc:name="Logger" doc:id="0f5c9528-c612-4ef5-bdec-ccb545d0d755" message="*************Finding the orders************************" />
+        <db:select doc:name="Select" doc:id="cb4ad3e2-8050-471d-b53c-3a5f80f8bd16" config-ref="Database_Config1">
+            <db:sql><![CDATA[select orderid, orderprice, order_dt from public."Orders" where userid= :uid]]></db:sql>
+            <db:input-parameters><![CDATA[#[{
+	uid: vars.uid
+}]]]></db:input-parameters>
+        </db:select>
+        <ee:transform xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	orderid: payload01.orderid,
+	orderdate: payload01.order_dt as String default "",
+	orderprice: payload01.orderprice default 0
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <logger level="INFO" doc:name="Logger" doc:id="790e2686-488a-479e-8be7-e3f87ad0dff8" message="#[payload]" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="d6ce15f3-f46f-43c9-a311-1fd1c68663f6" >
+				<logger level="INFO" doc:name="Logger" doc:id="4f1d5aa8-b6da-44aa-9b2c-180909ef583a" message="#[error.errorMessage]"/>
+				<ee:transform doc:name="Transform Message" doc:id="66498a57-7cf2-495a-9b27-bd87738c74a7" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"message": "DB Error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+  
+	</flow>
+	<flow name="bestCourses" doc:id="09063aff-453e-430d-92a6-123e1181ad9a" >
+	<db:select doc:name="Select" doc:id="be5ab181-53d9-4e68-8c4d-b810f0b40965" config-ref="Database_Config1">
+			<db:sql ><![CDATA[select c.name , c.duration, cast (count(o.courseid)+ avg(cast(o.ratings as int)) as decimal(18,2)) as performance from course c , orderdetails o where c.courseid=o.courseid group by c.name , c.duration order by performance desc
+]]></db:sql>
+		</db:select>
+		<ee:transform xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	duration: payload01.duration default "",
+	coursename: payload01.name default "",
+	Performance: payload01.performance default 0
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="99e4b654-db5f-4645-9bd5-75c462247f33" message="#[payload]"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="87cbc08e-1f89-4d9f-b706-5c0894c879b8" >
+				<logger level="INFO" doc:name="Logger" doc:id="a2b09f35-3959-458f-b12a-5299aa16bebe" message="#[error.errorMessage]"/>
+				<ee:transform doc:name="Transform Message" doc:id="3edf9f97-9c82-495e-a401-bfc32160e332" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"message": "DB Error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+    
+	</flow>
+	<flow name="sortingAsUserRequested" doc:id="cd6c51a3-f6f5-4a34-8557-b4a20e336b46" >
+	<logger level="INFO" doc:name="Logger" doc:id="88a93230-7801-4047-b8f0-7f88ae81c336" message="*********************Displaying the courses as user requested************************" />
+        <choice doc:name="Choice" doc:id="5d4459ae-8901-4c1c-b5fb-a5fb886aa033">
+            <when expression="#[vars.sort == 'LH']">
+                <choice doc:name="Choice" doc:id="fda8798b-e25e-4fdc-8ae1-9b5a546f42f5">
+                    <when expression="#[vars.category == '']">
+                        <db:select doc:name="Select" doc:id="ee62ce44-0fc2-4bec-8e5a-b6bdf8e0e0ef" config-ref="Database_Config1">
+                            <db:sql><![CDATA[select name, price, duration, author from course order by price]]></db:sql>
+                        </db:select>
+                        <logger level="INFO" doc:name="Logger" doc:id="c49a9710-b04b-4ea2-bc86-85790efe115b" message="#[payload]" />
+                    </when>
+                    <otherwise>
+                        <db:select doc:name="Select" doc:id="e81c7008-b78d-4aca-acd5-2dde0158e54c" config-ref="Database_Config1">
+                            <db:sql><![CDATA[select name, price, duration, author from course where upper(tags) like upper('%'||:category||'%')  order by price]]></db:sql>
+                            <db:input-parameters><![CDATA[#[{
+	category: vars.category
+}]]]></db:input-parameters>
+                        </db:select>
+                        <logger level="INFO" doc:name="Logger" doc:id="2606cf46-5c5f-474e-8291-063addc5aab8" message="#[payload]" />
+                    </otherwise>
+                </choice>
+                <ee:transform xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	duration: payload01.duration default "",
+	author: payload01.author default "",
+	price: payload01.price default 0,
+	name: payload01.name default ""
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+                <logger level="INFO" doc:name="Logger" doc:id="bd6e2509-02fa-452a-b45d-b4c755695b96" message="#[payload]" />
+            </when>
+            <otherwise>
+                <choice doc:name="Choice" doc:id="7fc9bb4c-dfa4-4358-9f52-d273034b4f0a">
+                    <when expression="#[vars.category == '']">
+                        <db:select doc:name="Select" doc:id="0f0cfa12-3895-43a4-918b-80ce5bbb61dc" config-ref="Database_Config1">
+                            <db:sql><![CDATA[select name, price, duration, author from course order by price desc]]></db:sql>
+                        </db:select>
+                    </when>
+                    <otherwise>
+                        <db:select doc:name="Select" doc:id="d6d6cb32-deee-4612-9caa-bb5a637da4b5" config-ref="Database_Config1">
+                            <db:sql><![CDATA[select name, price, duration, author from course where upper(tags) like upper('%'||:category||'%')  order by price desc]]></db:sql>
+                            <db:input-parameters><![CDATA[#[{
+	category: vars.category
+}]]]></db:input-parameters>
+                        </db:select>
+                    </otherwise>
+                </choice>
+                <ee:transform doc:name="Transform Message" doc:id="b6c3b65b-d966-4cdc-b090-7e593483aafd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	duration: payload01.duration default "",
+	author: payload01.author default "",
+	price: payload01.price default 0,
+	name: (payload01.price as String default "") ++ (payload01.name default "")
+}]]></ee:set-payload>
+                    </ee:message>
+                </ee:transform>
+                <logger level="INFO" doc:name="Logger" doc:id="f79a5c50-253d-47fa-8ecb-ffda91117b75" message="#[payload]" />
+            </otherwise>
+        </choice>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="19160c0a-91fe-4c9a-970b-dfb58879165d" >
+				<logger level="INFO" doc:name="Logger" doc:id="219d14fd-9022-45d7-ad1a-0a5c7131cc90" message="#[error.errorMessage]"/>
+				<ee:transform doc:name="Transform Message" doc:id="383ed64d-9bf8-467a-9467-9d344fbe1f2b" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"message": "DB Error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="contentOfWishlist" doc:id="98450bdb-2e51-4720-8f6f-f34959a81ee1" >
+	<db:select doc:name="Select" doc:id="b95d9ab9-f5dd-4789-9691-ba8e0ebf998b" config-ref="Database_Config">
+			<db:sql ><![CDATA[select c.name, c.price, c.author, c.duration from wishlist w , course c where w.courseid = c.courseid and w.userid= :uid  ]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	uid: vars.uid
+}]]]></db:input-parameters>
+		</db:select>
+        <ee:transform xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	duration: payload01.duration default "",
+	coursename: payload01.name default "",
+	price: payload01.price default 0,
+	author: payload01.author default ""
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="4460cceb-4a0d-40a9-b511-918938c0c96e" message="#[payload]"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="d96799e1-ac01-4266-b917-541a80100aa9" type="DB:BAD_SQL_SYNTAX, DB:CONNECTIVITY, DB:QUERY_EXECUTION, EXPRESSION">
+				<logger level="INFO" doc:name="Logger" doc:id="cfc5b753-f614-4b7d-980f-21dc55660197" message="#[error.errorMessage]"/>
+				<ee:transform doc:name="Transform Message" doc:id="8673364d-dcdf-4d01-a902-9249589a6251" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"message": "DB Error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+    
+	</flow>
+</mule>

@@ -1,0 +1,11 @@
+{
+"total_price": 3400,
+"cart-items":[{
+  "courseid": 201,
+  "coursename": "Java",
+  "courseprice": 2000},
+  {
+  "courseid": 201,
+  "coursename": "Java",
+  "courseprice": 2000
+  }]}

@@ -1,0 +1,11 @@
+http:
+  listner:
+    host: "localhost"
+    port: "8082"
+    path: "/api/*"
+  
+db:
+  postgresql:
+    url: "jdbc:postgresql://mulsoft-hu1.cnwunojhu2of.ap-south-1.rds.amazonaws.com:5432/IN2021_1272?sslmode=require"
+    user: "postgres"
+    password: "<,y#8Lq-,9>qRQ*P"

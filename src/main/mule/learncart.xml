@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+    <db:config name="Database_Config" doc:name="Database Config" doc:id="b770781a-ecf5-497f-864f-beb491a602f1">
+        <db:generic-connection url="jdbc:postgresql://mulsoft-hu1.cnwunojhu2of.ap-south-1.rds.amazonaws.com:5432/IN2021_1272?sslmode=require" driverClassName="org.postgresql.Driver" user="postgres" password="&lt;,y#8Lq-,9&gt;qRQ*P" />
+    </db:config>
+    <db:config name="Database_Config1" doc:name="Database Config" doc:id="47189a3b-cb8c-422c-9759-59fe21505dbd">
+        <db:generic-connection url="${db.postgresql.url}" driverClassName="org.postgresql.Driver" user="${db.postgresql.user}" password="${db.postgresql.password}" />
+    </db:config>
+    <apikit:config outboundHeadersMapName="outboundHeadersMapName" httpStatusVarName="httpStatus" doc:name="Router" doc:id="9ca4ec85-5e54-434b-8b7f-9bf0ebde646f" name="learncart-config" raml="api\learncart.raml" keepRamlBaseUri="true" api="learncart.raml" />
+    <json-logger:config name="JSON_Logger_Config" doc:name="JSON Logger Config" doc:id="50b5fc3f-1894-4b5d-9267-13090be50aa8" environment="${mule.env}" />
+	<flow name="learncart-main">
+        <http:listener config-ref="learncart-httpListenerConfig" path="${http.listner.path}">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router doc:id="9a0e2a1c-8a28-4a71-8639-4f348ec70037" doc:name="" config-ref="learncart-config" />
+        <error-handler ref="commonErrorHandlerError_Handler" />
+    </flow>
+    <flow name="learncart-console">
+        <http:listener config-ref="learncart-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console doc:name="APIkit Console" doc:id="d3c95fa6-ea61-408c-bfce-e90c5aefeba1" config-ref="learncart-config" />
+    </flow>
+    <flow name="post:\user:application\json:learncart-config">
+        <flow-ref doc:name="addUser" doc:id="737ee7f8-5cbd-42ec-bffe-a2bef0fd67cb" name="addUser" />
+    </flow>
+    <flow name="put:\user:application\json:learncart-config">
+        <set-variable value="#[attributes.queryParams.uid]" doc:name="Set Variable" doc:id="e0934703-0d69-4b01-9d95-cc9267122563" variableName="uid" />
+		<flow-ref doc:name="updateUser" doc:id="4b45872e-708a-4787-806c-60e58c6349b2" name="updateUser" />
+    </flow>
+    <flow name="get:\user:learncart-config">
+        <set-variable value="#[attributes.queryParams.uid]" doc:name="Set Variable" doc:id="0012580b-d967-4c38-be32-c8fac1f1aa4d" variableName="userid" />
+        <flow-ref doc:name="usersAndSubscribedCourseDetails" doc:id="c64773a7-331e-4f0f-a826-c14d54c80846" name="usersAndSubscribedCourseDetails" />
+    </flow>
+    <flow name="delete:\user\(id)\cart:learncart-config">
+        <set-variable value="#[attributes.uriParams.id]" doc:name="Set Variable" doc:id="449b3b15-3871-47fc-a879-127723f29ffd" variableName="Uid" />
+        <set-variable value="#[attributes.queryParams.name]" doc:name="Set Variable" doc:id="7f27d6a3-dd88-4d01-aaef-b0d85fcbb3c1" variableName="coursename" />
+        <flow-ref doc:name="deleteCoursesFromCart" doc:id="514a8a25-35cc-457f-bfd4-559792a6acfc" name="deleteCoursesFromCart" />
+    </flow>
+    <flow name="delete:\course:application\json:learncart-config">
+        <flow-ref doc:name="deleteCourse" doc:id="94e0c1fc-4d7b-474e-8a4d-89792c38e405" name="deleteCourse" />
+    </flow>
+    <flow name="delete:\user\(id)\subscription:application\json:learncart-config">
+        <set-variable value="#[attributes.uriParams.id]" doc:name="Set Variable" doc:id="cf252a75-bf51-4b8e-b744-f09c83b01608" variableName="uid" />
+        <foreach doc:name="For Each" doc:id="a5f46740-ac78-46e3-844e-3903872036e3">
+            <db:delete doc:name="Delete" doc:id="ff6ac00c-0db4-4955-b8ea-3979ff2c54f9" config-ref="Database_Config">
+                <db:sql><![CDATA[delete from cart where userid= :uid and courseid=(select courseid from course where name= :cname1)]]></db:sql>
+                <db:input-parameters><![CDATA[#[{
+	uid: vars.uid,
+	cname1: payload.name
+}]]]></db:input-parameters>
+            </db:delete>
+        </foreach>
+        <flow-ref doc:name="deleteFromCart" doc:id="1d6ac8a3-92a3-4a7a-ba37-5e67acc4c747" name="deleteFromCart" />
+    </flow>
+    <flow name="get:\course:learncart-config">
+        <set-variable value="#[attributes.queryParams.coursename]" doc:name="Set Variable" doc:id="dfa2cc6e-a09a-4019-b0ca-53a622f4e7e6" variableName="coursename" />
+        <flow-ref doc:name="courseDetails" doc:id="46da5a7a-3110-4517-a911-2dca3eb36b47" name="courseDetails" />
+    </flow>
+    <flow name="get:\cart\user:learncart-config">
+        <set-variable value="#[attributes.queryParams.id]" doc:name="Set Variable" doc:id="48cd6b47-7d04-4b87-a5f9-e34a2f9e74f2" variableName="userid" />
+        <flow-ref doc:name="contentOfCart" doc:id="45d137e1-a229-4470-a002-1dd1961374f7" name="contentOfCart" />
+    </flow>
+    <flow name="get:\order\user:learncart-config">
+        <set-variable value="#[attributes.queryParams.id]" doc:name="Set Variable" doc:id="9620dcab-9383-40bc-aec4-6c7d6c153db3" variableName="uid" />
+        <flow-ref doc:name="displayOrders" doc:id="58caa709-1239-4bf4-ae03-eaf49a168419" name="displayOrders" />
+    </flow>
+    <flow name="post:\user\(id)\cart:learncart-config">
+        <set-variable value="#[attributes.uriParams.'id']" doc:name="Set Variable" doc:id="51303fa5-4d3c-458f-8d56-07dce42ddf59" variableName="userId" />
+        <set-variable value="#[attributes.queryParams.name]" doc:name="Set Variable" doc:id="1619f303-0829-40c6-9b69-7c4eeec50d56" variableName="name" />
+        <flow-ref doc:name="courseAddedInCart" doc:id="0bd68907-1802-444c-a8db-7364f80313ef" name="courseAddedInCart" />
+    </flow>
+    <flow name="post:\course:application\json:learncart-config">
+        <json-logger:logger doc:name="Logger" doc:id="1e57dd94-2961-4517-bf00-9724e44a96e6" config-ref="JSON_Logger_Config" message="Initial request"/>
+		<flow-ref doc:name="addCourse" doc:id="5cbcd80a-8657-4261-8cf6-72d1f05625aa" name="addCourse" />
+    </flow>
+    <flow name="post:\user\(id)\orderdetails:application\json:learncart-config">
+        <set-variable value="#[attributes.uriParams.id]" doc:name="Set Variable" doc:id="6f659176-72b9-44f1-b77b-9b2fb771e42a" variableName="id" />
+        <foreach doc:name="For Each" doc:id="ded398f4-f1b4-4b0d-8e14-8f3a7af57e68" collection="#[payload]">
+            <logger level="INFO" doc:name="Logger" doc:id="af50afd1-dfc0-44c7-bf1a-4d4240f7c59e" message="#[payload]" />
+            <db:update doc:name="Update" doc:id="6220f138-a2da-41b4-8466-a8b2b842b5d8" config-ref="Database_Config">
+                <db:sql><![CDATA[update orderdetails set ratings= :ratings , review= :review where orderid =:orderid and courseid = :courseid]]></db:sql>
+                <db:input-parameters><![CDATA[#[{
+	ratings: payload.rating,
+	review: payload.review,
+	orderid: payload.orderid,
+	courseid: payload.courseid
+}]]]></db:input-parameters>
+            </db:update>
+        </foreach>
+        <flow-ref doc:name="addReviewAndRatings" doc:id="3ac092f1-9115-4c8a-848f-bb78190dc190" name="addReviewAndRatings" />
+    </flow>
+    <flow name="post:\user\(id)\subscription:application\json:learncart-config">
+        <set-variable value="#[attributes.uriParams.'id']" doc:name="Set Variable" doc:id="de6a978b-26bb-4490-aba9-65abe3612727" variableName="UserID" />
+        <foreach doc:name="For Each" doc:id="a0419c9f-617b-4307-baa1-ba30774447e0" collection="#[payload]">
+            <logger level="INFO" doc:name="Logger" doc:id="6cc8b776-7738-4c7a-a6ce-4a145da208a4" message="*************************adding into cart*******************************" />
+            <db:insert doc:name="Insert" doc:id="0c58794d-ca2b-4648-822e-e6046aa20cfb" config-ref="Database_Config">
+                <db:sql><![CDATA[insert into cart(userid,courseid,price) select u.id, c.courseid, price  from users u cross join course c where  c.name = :name and u.id = :uid]]></db:sql>
+                <db:input-parameters><![CDATA[#[{
+	uid: vars.UserID,
+	name: payload.name
+}]]]></db:input-parameters>
+            </db:insert>
+        </foreach>
+        <ee:transform xsi:schemaLocation=" http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Course Added"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <logger level="INFO" doc:name="Logger" doc:id="9cde8577-ff48-4caa-8524-a42617c39b30" message="Added into cart" />
+    </flow>
+    <flow name="get:\learncart\bestcourses:learncart-config">
+        <flow-ref doc:name="bestCourses" doc:id="80aba85d-3db9-4059-83b0-42aa9c693394" name="bestCourses" />
+    </flow>
+    <flow name="get:\learncart:application\json:learncart-config">
+        <set-variable value="#[attributes.queryParams.sort]" doc:name="Set Variable" doc:id="7c9f465c-bb1e-4ebd-94b0-5fb4bcaea105" variableName="sort" />
+        <set-variable value="#[payload.category]" doc:name="Set Variable" doc:id="066c61bc-587a-4d79-a6c0-286d5088b60f" variableName="category" />
+        <flow-ref doc:name="sortingAsUserRequested" doc:id="efd70738-59d0-4dbf-b006-6401a6a19c05" name="sortingAsUserRequested" />
+    </flow>
+    <flow name="post:\wishlist\user\(id)\cart:learncart-config">
+        <set-variable value="#[attributes.uriParams.id]" doc:name="Set Variable" doc:id="f1bec7d7-9ba8-4471-aea0-5e0810311f0d" variableName="uid" />
+        <set-variable value="#[attributes.queryParams.coursename]" doc:name="Set Variable" doc:id="b770781a-ecf5-497f-864f-beb491a602f1" variableName="coursename" />
+        <flow-ref doc:name="moveCoursesFromWishlistToCart" doc:id="9229ad62-8999-421e-a542-518805f60d8a" name="moveCoursesFromWishlistToCart" />
+    </flow>
+    <flow name="post:\order\user:learncart-config">
+        <set-variable value="#[attributes.queryParams.id]" doc:name="Set Variable" doc:id="8c3395cf-a4d9-4d6c-b24b-84874f2734a8" variableName="id" />
+        <flow-ref doc:name="createOrder" doc:id="72fef089-e123-4963-bfb0-027c49d3db43" name="createOrder" />
+    </flow>
+    <flow name="post:\user\(id)\wishlist:application\json:learncart-config">
+        <set-variable value="#[attributes.uriParams.id]" doc:name="Set Variable" doc:id="2a1bed45-c899-49b6-b1c2-b369e8fdb967" variableName="uid" />
+        <flow-ref doc:name="addToWishlist" doc:id="c9ea6265-53c9-4bc4-9b91-292466e71d99" name="addToWishlist" />
+    </flow>
+    <flow name="get:\user\(id)\wishlist:learncart-config">
+        <set-variable value="#[attributes.uriParams.id]" doc:name="Set Variable" doc:id="9f93c4a3-a33e-4e17-918c-2bbb4ae81c22" variableName="uid" />
+        <flow-ref doc:name="contentOfWishlist" doc:id="e6e57313-2a7f-453e-bc8e-2220ec7ac8d1" name="contentOfWishlist" />
+    </flow>
+</mule>

@@ -1,0 +1,16 @@
+[
+  {
+    "name": "JK Rowling",
+    "description": "Story book",
+    "author": "JK Rowling",
+    "Price": 2000,
+    "Duration": "2hrs"
+  },
+  {
+    "name": "Java courses",
+    "description": "Core java",
+    "author": "James",
+    "Price": 1000,
+    "Duration": "4hrs"
+  }
+]

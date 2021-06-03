@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<munit:config name="learncart-test-suite.xml" />
+	<munit:test name="learncart-test-suite-post:\user:application\json:learncart-configTest" doc:id="6c9a6184-c9c7-448a-93a7-7ee41681eda5" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="08c5c360-45d9-4944-bcee-9f3f46b61eca" >
+				<munit:payload value='{&#10;    "displayname": "MS",&#10;    "firstname": "Messy",&#10;    "lastname": "k",&#10;    "interests": ".Net",&#10;    "usertype": "student",&#10;    "experience": 0,&#10;    "role": "student",&#10;    "domain": "Backend",&#10;    "bio": "styding in lk university",&#10;    "mobileno": 7890564356&#10;}' mediaType="application/json" />
+				<munit:attributes value="#[{queryParams : {uid: 'U9'}}]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to post:\user:application\json:learncart-config" doc:id="581f78c5-3cb8-4297-b7c9-d667240e4478" name="post:\user:application\json:learncart-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="learncart-test-suite-put:\user:application\json:learncart-configTest" doc:id="b9467a53-b86c-4fa0-b5c2-b8abf9144c3e" description="Test">
+		<munit:behavior>
+			<munit:set-event doc:name="Set Event" doc:id="f55f622b-9593-4e88-b5e3-89eb7785863b" >
+				<munit:payload value='{&#10;    "displayname": "MS",&#10;    "firstname": "Messy",&#10;    "lastname": "k",&#10;    "interests": ".Net",&#10;    "usertype": "student",&#10;    "experience": 0,&#10;    "role": "student",&#10;    "domain": "Backend",&#10;    "bio": "styding in lk university",&#10;    "mobileno": 7890564356&#10;}' mediaType="application/json" />
+				<munit:attributes value="#[{queryParams : {uid: 'U9'}}]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to put:\user:application\json:learncart-config" doc:id="d03f3c9e-9887-4843-9061-e8c9c043bb8a" name="put:\user:application\json:learncart-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="learncart-test-suite-get:\user:learncart-configTest" doc:id="079d6098-6988-4a78-9cad-9d70b3e4fc53" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="0aafead6-5eb0-434b-a337-d906aa26554e" >
+				<munit:attributes value="#[{queryParams : {uid: 'U4'}}]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\user:learncart-config" doc:id="dd357db5-49bb-421d-8e44-742dcc0c3a25" name="get:\user:learncart-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="learncart-test-suite-delete:\user\(id)\cart:learncart-configTest" doc:id="bd765988-dd61-4d7c-9585-1f2e931881e1" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="fb0dffd7-b3d8-448d-9120-55a43b183451" >
+				<munit:attributes value="#[{uriParams : {uid : 'U5'}}]&#10;" />
+			</munit:set-event>
+			<munit:set-event doc:name="Set Event" doc:id="d40ada70-437b-4200-993f-31dfad8a47f4" >
+				<munit:attributes value="#[{queryParams : {name: 'Java'}}]&#10;" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to delete:\user\(id)\cart:learncart-config" doc:id="0ac39cb3-1838-4037-8c57-f86df62391ee" name="delete:\user\(id)\cart:learncart-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="learncart-test-suite-delete:\course:application\json:learncart-configTest" doc:id="b29ca46c-d3b5-48bd-bd33-329db20d0be7" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="0a7fce87-0f65-4d64-afa0-6274b50347ef" >
+				<munit:payload value='{&#10;"name" : "Jaa"&#10;}' mediaType="application/json" />
+				<munit:attributes value="#[{queryParams : {name: 'Jaa'}}]&#10;" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to delete:\course:application\json:learncart-config" doc:id="f8a4528d-cf01-4b30-b397-9911636da069" name="delete:\course:application\json:learncart-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="learncart-test-suite-delete:\user\(id)\subscription:application\json:learncart-configTest" doc:id="a5ce0c36-c75e-4bd9-a25a-535aeed2a041" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="5141fd11-21c8-48e5-957e-c17ff710205e" >
+				<munit:payload value='{&#10;"name" : "Ja"&#10;}' mediaType="application/json" />
+				<munit:attributes value="#[{uriParams : {uid : 'U5'}}]&#10;" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to delete:\user\(id)\subscription:application\json:learncart-config" doc:id="56bd9edd-534b-4843-9861-3ccea43d21a4" name="delete:\user\(id)\subscription:application\json:learncart-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="learncart-test-suite-get:\course:learncart-configTest" doc:id="c4c2f230-60d4-4531-b40a-aacb02025e31" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="c2abc621-5568-41c4-9966-eb0d579288f6" >
+				<munit:attributes value="#[{queryParams : {coursename: 'Java'}}]&#10;" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\course:learncart-config" doc:id="d42a27f6-6288-4a8e-b8c0-b54a693a4ff9" name="get:\course:learncart-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="learncart-test-suite-get:\cart\user:learncart-configTest" doc:id="94045f70-7f70-4d31-b8a9-b581fc7476e3" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="159ccb2d-9b72-4415-b96b-5efc06b3c220" >
+				<munit:attributes value="#[{queryParams : {uid: 'U3'}}]&#10;" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\cart\user:learncart-config" doc:id="cd452182-0660-45d7-bbdc-b3440c777a21" name="get:\cart\user:learncart-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="learncart-test-suite-get:\order\user:learncart-configTest" doc:id="ab65803f-3c9e-4ef0-85dd-29eaad90b660" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="8b49a76d-ac33-429c-b563-a7c4407d5817" >
+				<munit:attributes value="#[{queryParams : {id: 'U2'}}]&#10;" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\order\user:learncart-config" doc:id="75ecf0fd-e7c5-4521-a53e-569e2f35d297" name="get:\order\user:learncart-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="learncart-test-suite-post:\user\(id)\cart:learncart-configTest" doc:id="c6b614d8-2f8a-40cc-8382-bb949f32b414" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="f088c7c7-71b8-4eed-8943-b53a0d99f9ed" >
+				<munit:payload value="#[{uriParams : {id: 'U9'}}]&#10;" />
+			</munit:set-event>
+			<munit:set-event doc:name="Set Event" doc:id="c1b5a462-876d-4839-a93c-95a56960baf8" >
+				<munit:attributes value="#[{queryParams : {name: 'Java'}}]&#10;" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to post:\user\(id)\cart:learncart-config" doc:id="70f5e91c-8f9e-4e4d-8a1e-d9c186c89b54" name="post:\user\(id)\cart:learncart-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="learncart-test-suite-post:\course:application\json:learncart-configTest" doc:id="292845b2-5fae-4e29-92ad-788d23be2905" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="3cd1d423-23fe-4e83-aed2-b8fb32570222" >
+				<munit:payload value='{&#10;            "name": "Introduction to AWS",&#10;            "description": "Everything about AWS which you need to know",&#10;            "author": "k.shaw",&#10;            "Price": 2000,&#10;            "Duration": "2hrs"&#10;          }' />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to post:\course:application\json:learncart-config" doc:id="ed8882e7-8d0a-4807-951a-fb0e89664d37" name="post:\course:application\json:learncart-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="learncart-test-suite-post:\user\(id)\orderdetails:application\json:learncart-configTest" doc:id="ffd04a74-09c6-4134-b917-cfa13b3133da" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="62422163-2c93-4220-9fc9-78d0975a74e6" >
+				<munit:payload value='{&#10;	"ratings": "4",&#10;	"review": "ghjk kj",&#10;	"orderid": "C5",&#10;	"courseid": "C5"&#10;}' />
+				<munit:attributes value="#[{uriParams : {id: 'U5'}}]&#10;" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to post:\user\(id)\orderdetails:application\json:learncart-config" doc:id="75c00249-1f8b-4493-b06f-a6cc3fdb7e58" name="post:\user\(id)\orderdetails:application\json:learncart-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="learncart-test-suite-post:\user\(id)\subscription:application\json:learncart-configTest" doc:id="dd0e0d10-2e2e-43ef-82e0-3a266516047f" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="4adb8865-e25e-4287-b381-1764f5de9eb5" >
+				<munit:payload value='{&#10;"name": "HK"&#10;}&#10;' />
+				<munit:attributes value="#[{uriParams : {id: 'U3'}}]&#10;" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to post:\user\(id)\subscription:application\json:learncart-config" doc:id="03552945-fa7b-43ac-95d6-051e9e54d7cf" name="post:\user\(id)\subscription:application\json:learncart-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="learncart-test-suite-get:\learncart\bestcourses:learncart-configTest" doc:id="250eb9be-7448-48fa-91de-bdfc20c961db" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="bffa58d5-27b2-4c58-bbe8-c9c542a0c73b" />
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\learncart\bestcourses:learncart-config" doc:id="92e7250f-a218-4a5b-a56d-f0cf5c2a6224" name="get:\learncart\bestcourses:learncart-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="learncart-test-suite-get:\learncart:application\json:learncart-configTest" doc:id="99cfae56-d49f-4915-b5a4-2624c55fac30" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="eaf1fdd2-d646-4991-b75f-07ea06f98101" >
+				<munit:payload value='{&#10;"name": " ",&#10;"category": "Java"&#10;}' mediaType="application/json" />
+				<munit:attributes value="#[{queryParams : {sort: 'LH'}}]&#10;" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\learncart:application\json:learncart-config" doc:id="11b29167-5f00-4e97-b592-1a17419fdb93" name="get:\learncart:application\json:learncart-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="learncart-test-suite-post:\wishlist\user\(id)\cart:learncart-configTest" doc:id="24d7474f-641c-451b-9504-84a8e0950cbd" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="6fa5a106-77de-4f48-8ced-108e4ad4a458" >
+				<munit:attributes value="#[{uriParams : {id: 'U3'}}]&#10;" />
+			</munit:set-event>
+			<munit:set-event doc:name="Set Event" doc:id="2d511a43-1601-4402-a4fe-a919bfffb29d" >
+				<munit:attributes value="#[{queryParams : {coursename: 'Java'}}]&#10;" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to post:\wishlist\user\(id)\cart:learncart-config" doc:id="21413a91-c633-42e6-8264-319c9d35dd59" name="post:\wishlist\user\(id)\cart:learncart-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="learncart-test-suite-post:\order\user:learncart-configTest" doc:id="ec071a40-93a7-4dd0-8901-a3e1d54f9aa6" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="10c52e37-c846-4022-ae10-5bc05e9aaecb" >
+				<munit:attributes value="#[{uriParams : {id: 'U3'}}]&#10;" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to post:\order\user:learncart-config" doc:id="9c4c46f2-7229-4d86-99b6-78641514d468" name="post:\order\user:learncart-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="learncart-test-suite-post:\user\(id)\wishlist:application\json:learncart-configTest" doc:id="62bb2131-67ae-4340-a789-198f8300a508" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="51a736e6-bc8d-4208-848c-3e55966aaa24" >
+				<munit:payload value='{&#10;"name" : "NEET PG"&#10;}' />
+				<munit:attributes value="#[{uriParams : {id: 'U9'}}]&#10;" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to post:\user\(id)\wishlist:application\json:learncart-config" doc:id="dcf0693e-7164-48aa-9a07-69aa9ef6b4b5" name="post:\user\(id)\wishlist:application\json:learncart-config"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="learncart-test-suite-get:\user\(id)\wishlist:learncart-configTest" doc:id="9864f874-6932-424d-84f6-90049d817979" description="Test">
+		<munit:behavior>
+			<munit:set-event doc:name="Set Event" doc:id="0089a422-7727-43ce-8e2d-4041fcffc156" >
+				<munit:attributes value="#[{uriParams : {id: 'U3'}}]&#10;" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\user\(id)\wishlist:learncart-config" doc:id="fff475a7-c09c-4337-8a68-45e088cb9f6a" name="get:\user\(id)\wishlist:learncart-config"/>
+		</munit:execution>
+	</munit:test>
+
+
+</mule>
