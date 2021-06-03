@@ -35,4 +35,4 @@ jobs:
  
 
         - name: Build and cloudhub deployment
-          run: mvn clean package deploy -DmuleDeploy -Dusername="${{ secrets.USERNAME }}" -Dpassword="${{ secrets.PASSWORD }}"
+          run: mvn clean package deploy -DmuleDeploy -DskipMunitTests -Dusername="${{ secrets.USERNAME }}" -Dpassword="${{ secrets.PASSWORD }}" 
